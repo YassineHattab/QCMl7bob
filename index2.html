@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>15 Cas Cliniques - Pratiques Obstétricales</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #e74c3c;
+            --accent: #2980b9;
+            --success: #27ae60;
+            --error: #c0392b;
+            --bg: #f5f7fa;
+            --card-bg: #ffffff;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 35px;
+            border-radius: 12px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.07);
+        }
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            border-bottom: 4px solid var(--accent);
+            padding-bottom: 15px;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            font-style: italic;
+            margin-bottom: 35px;
+        }
+        .case-card {
+            background: #fff;
+            padding: 22px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            border-left: 5px solid var(--accent);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+            transition: all 0.3s ease;
+        }
+        .case-title {
+            font-weight: 700;
+            color: var(--accent);
+            font-size: 1.15em;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .case-context {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border: 1px solid #e2e8f0;
+            font-style: justify;
+        }
+        .question-text {
+            font-weight: 600;
+            font-size: 1.05em;
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+        .options-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .option {
+            padding: 12px 15px;
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+        .option:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            transform: translateX(4px);
+        }
+        .case-card.disabled .option {
+            pointer-events: none;
+        }
+        .option.correct {
+            background: #d1fae5 !important;
+            border-color: var(--success) !important;
+            color: #065f46;
+            font-weight: bold;
+        }
+        .option.wrong {
+            background: #fee2e2 !important;
+            border-color: var(--error) !important;
+            color: #991b1b;
+        }
+        .feedback-box {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 6px;
+            font-size: 0.95em;
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+        .feedback-box.visible {
+            display: block;
+        }
+        .feedback-box.correct-feedback {
+            background: #ecfdf5;
+            border-left: 5px solid var(--success);
+            color: #065f46;
+        }
+        .feedback-box.wrong-feedback {
+            background: #fffaf0;
+            border-left: 5px solid #f59e0b;
+            color: #78350f;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            color: #94a3b8;
+            font-size: 0.85em;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>15 Cas Cliniques de Synthèse - Pratiques Obstétricales</h1>
+    <div class="subtitle">Lisez attentivement l'énoncé de chaque cas, puis cliquez sur votre option pour valider et afficher l'analyse.</div>
+
+    <div id="cases-container"></div>
+
+    <footer>
+        École Supérieure de Sciences et Techniques de la Santé de Tunis (ESTST) - Tunis-El Manar.
+    </footer>
+</div>
+
+<script>
+    const casesData = [
+        {
+            title: "Cas Clinique 1 : Surveillance active du Travail (L'Expulsion)",
+            context: "Mme S., primipare de 24 ans, est installée sur la table d'accouchement à dilatation complète. La poche des eaux est rompue spontanément. Après 35 minutes d'efforts expulsifs bien conduits en apnée bloquée, la présentation céphalique est fixée au détroit inférieur. L'auscultation du Rythme Cardiaque Fœtal (RCF) effectuée immédiatement après la dernière contraction utérine révèle une bradycardie sévère et persistante à 85 battements/minute.",
+            question: "Quelle doit être la conduite à tenir immédiate face à cette situation ?",
+            options: [
+                "Demander à la patiente d'arrêter immédiatement de pousser et d'attendre 15 minutes la rémission clinique.",
+                "Poursuivre calmement la surveillance du RCF toutes les 5 minutes en encourageant la poussée expiratoire.",
+                "Informer l'obstétricien en urgence pour accélérer immédiatement la naissance (extraction instrumentale ou épisiotomie large).",
+                "Pratiquer immédiatement une manœuvre de refoulement utérin sus-pubienne."
+            ],
+            correct: 2,
+            rationale: "La durée moyenne de l'expulsion chez une primipare est de 30 minutes. Au-delà, et en présence d'une anomalie majeure du RCF (bradycardie < 100 bpm), la souffrance fœtale aiguë est avérée. Il faut immédiatement abréger la phase d'expulsion pour extraire l'enfant."
+        },
+        {
+            title: "Cas Clinique 2 : Hémorragie du Post-Partum Immédiat",
+            context: "Mme F. vient d'accoucher d'un nouveau-né de 3 900 g par voie basse. La délivrance a eu lieu naturellement 15 minutes plus tard. Lors de la surveillance du post-partum immédiat à la 30ème minute, la sage-femme note un saignement vaginal rouge vif abondant continu (estimé à 600 mL). À la palpation abdominale, l'utérus est retrouvé mou, montant au-dessus de l'ombilic, sans masse ferme individualisable.",
+            question: "Quel est le diagnostic principal et l'action prioritaire à réaliser ?",
+            options: [
+                "Délivrance artificielle immédiate pour suspicion de rétention placentaire complète.",
+                "Atonie utérine secondaire ; réaliser immédiatement un massage utérin abdominal pour obtenir le globe de sécurité.",
+                "Déchirure simple du périnée ; poser immédiatement des points de suture sous anesthésie.",
+                "Infection chorioamniotique ; administrer en urgence des antibiotiques à large spectre."
+            ],
+            correct: 1,
+            rationale: "L'absence d'une masse utérine ferme (globe de sécurité absent) associée à un saignement supérieur à 500 mL signe une atonie utérine. Le geste immédiat est le massage utérin transabdominal pour stimuler les contractions des fibres musculaires et assurer la ligature mécanique des vaisseaux."
+        },
+        {
+            title: "Cas Clinique 3 : Évaluation macroscopique du Délivre",
+            context: "Vous réalisez l'examen macroscopique du délivre juste après son expulsion. En inspectant la face maternelle (plaque basale), vous observez une surface rouge charnue, mais un sillon profond est bien visible avec une solution de continuité nette : il manque un cotylédon entier à la périphérie du disque placentaire. La patiente ne saigne pas activement pour le moment.",
+            question: "Quelle est la conduite à tenir impérative ?",
+            options: [
+                "Consigner l'anomalie dans le dossier médical et autoriser le retour en chambre puisque la patiente ne saigne pas.",
+                "Réaliser immédiatement une révision utérine manuelle pour extraire le cotylédon retenu avant que l'utérus ne se rétracte.",
+                "Administrer de la vitamine D (Stérogyl) à la mère pour provoquer la résorption du fragment.",
+                "Pratiquer une toilette vulvo-périnéale biquotidienne à l'antiseptique en salle de naissance."
+            ],
+            correct: 1,
+            rationale: "La vacuité utérine absolue est indispensable à l'hémostase définitive. Même en l'absence de saignement immédiat, la rétention d'un cotylédon placentaire bloque la rétraction complète et expose à une hémorragie secondaire gravissime. Une révision utérine doit être faite sans attendre."
+        },
+        {
+            title: "Cas Clinique 4 : Examen des Membranes du Délivre",
+            context: "Au cours de l'examen minutieux des membranes d'un délivre issu d'un accouchement à 39 SA, vous mesurez la distance séparant l'orifice de rupture du bord le plus proche du gâteau placentaire. Vous constatez que ce 'petit côté' mesure exactement 4 cm. Les membranes sont par ailleurs de couleur normale, transparentes et entières.",
+            question: "Comment interprétez-vous rétrospectivement cette anomalie de longueur ?",
+            options: [
+                "Elle traduit une chorioamniotite bactérienne aiguë survenue pendant le travail.",
+                "Elle apporte la preuve anatomique d'un placenta bas-inséré in utero.",
+                "Elle indique que le cordon ombilical présente une insertion vélamenteuse.",
+                "C'est un critère normal qui caractérise un mode de délivrance de type Duncan."
+            ],
+            correct: 1,
+            rationale: "Un 'petit côté' des membranes inférieur ou égal à 10 cm témoigne rétrospectivement que le bord inférieur du placenta siégeait à proximité immédiate de l'orifice interne du col utérin, confirmant le diagnostic de placenta bas-inséré."
+        },
+        {
+            title: "Cas Clinique 5 : Risque vasculaire fœtal (Cordon ombilical)",
+            context: "Vous examinez la face fœtale d'un placenta. Vous observez que le cordon ombilical ne s'insère pas sur le disque placentaire, mais directement sur les membranes amniotiques. Les vaisseaux ombilicaux cheminent à nu, de manière linéaire et non protégés, sur une distance de 8 cm au sein des membranes avant de rejoindre la plaque choriale.",
+            question: "Comment se nomme cette anomalie et quel est le risque majeur associé lors de la rupture des membranes ?",
+            options: [
+                "Insertion en raquette ; risque d'hépatosplénomégalie néonatale.",
+                "Insertion vélamenteuse ; risque de déchirure d'un vaisseau et d'hémorragie de Benckiser mortelle pour le fœtus.",
+                "Cordon court pathologique ; risque de calcification précoce du céphalhématome.",
+                "Nœud vrai du cordon ; risque de hernie inguinale fœtale unilatérale."
+            ],
+            correct: 1,
+            rationale: "L'insertion du cordon sur les membranes est une insertion vélamenteuse. Lors de la rupture de la poche des eaux, si la brèche intéresse le trajet d'un de ces vaisseaux dénudés, il se déchire : c'est l'hémorragie de Benckiser, provoquant une spoliation sanguine fœtale immédiate."
+        },
+        {
+            title: "Cas Clinique 6 : Adaptation Immédiate à la Naissance (Score d'Apgar)",
+            context: "Un nouveau-né vient d'accoucher après un travail prolongé. À la 1ère minute de vie, la sage-femme note l'état clinique suivant : l'enfant est entièrement bleu, sa fréquence cardiaque est auscultée à 90 battements/minute, il grimace discrètement lors de l'introduction de la sonde d'aspiration, ses quatre membres sont en légère flexion mais sans mouvements actifs, et sa respiration est lente et irrégulière.",
+            question: "Calculez le score d'Apgar exact à 1 minute et déterminez l'interprétation clinique.",
+            options: [
+                "Score d'Apgar = 7 ; Adaptation normale, soins de routine au lit de la mère.",
+                "Score d'Apgar = 2 ; État de mort apparente, réanimation cardio-respiratoire lourde immédiate.",
+                "Score d'Apgar = 4 ; Asphyxie périnatale modérée, nécessitant des manœuvres immédiates de réanimation respiratoire.",
+                "Score d'Apgar = 9 ; Nouveau-né vigoureux, mise au sein précoce immédiate."
+            ],
+            correct: 2,
+            rationale: "Calcul : Apparence = 0 (bleu), Pouls = 1 (<100), Grimace = 1 (grimace faible), Activité = 1 (flexion seule), Respiration = 1 (lente/irrégulière). Total = 4. Un score entre 4 et 6 traduit une asphyxie périnatale modérée qui impose des soins de réanimation (désobstruction, ventilation au masque)."
+        },
+        {
+            title: "Cas Clinique 7 : Syndrome Traumatique Crânien Néonatal",
+            context: "Vous examinez un nouveau-né à H12 de vie, né par extraction instrumentale (ventouse). Au niveau du crâne, vous palpez une tuméfaction molle, fluctuante, volumineuse, siégeant spécifiquement au niveau de l'os pariétal droit. Vous notez de façon très nette que les limites de cette collection s'arrêtent précisément au niveau des sutures de l'os pariétal, sans jamais les franchir.",
+            question: "Quel est le diagnostic exact de cette lésion et son évolution attendue ?",
+            options: [
+                "Bosse sérosanguine ; elle va se résorber spontanément en 2 à 4 jours.",
+                "Encéphalocèle médiane ; elle nécessite un transfert neurochirurgical en urgence.",
+                "Céphalhématome sous-périosté ; il est limité par les sutures et peut évoluer vers la calcification en plusieurs semaines.",
+                "Crâne bifide asymétrique ; évolution spontanée vers la régression en 6 heures."
+            ],
+            correct: 2,
+            rationale: "La collection étant strictement limitée par les sutures d'un seul os (ici le pariétal), il s'agit d'un céphalhématome (épanchement de sang sous-périosté). Contrairement à la bosse sérosanguine qui chevauche les sutures, le céphalhématome met plusieurs semaines à régresser et peut se calcifier."
+        },
+        {
+            title: "Cas Clinique 8 : Détresse Infectieuse des Annexes",
+            context: "Vous assistez à un accouchement où la poche des eaux était rompue depuis plus de 24 heures chez une patiente fébrile. Lors de la délivrance, le placenta et les membranes s'extériorisent. À l'examen macroscopique, les membranes ont perdu leur transparence habituelle, dégagent une odeur fétide prononcée et présentent un aspect macroscopique franchement « sale ».",
+            question: "Vers quelle pathologie cette description vous oriente-t-elle et quelle est la priorité ?",
+            options: [
+                "Iso-immunisation Rhésus sévère ; transférer le nouveau-né pour exsanguino-transfusion.",
+                "Chorioamniotite (infection des tissus ovulaires) ; surveillance infectieuse stricte du couple mère-enfant et antibiothérapie.",
+                "Souffrance fœtale aiguë chronique par émission de méconium ancien.",
+                "Placenta praevia méconnu ; pratiquer une révision utérine systématique."
+            ],
+            correct: 1,
+            rationale: "Des membranes d'aspect 'sales' et fétides associées à une rupture prolongée de la poche des eaux et une fièvre maternelle signent cliniquement une chorioamniotite. Cela expose la mère à l'endométrite et le nouveau-né à une infection bactérienne néonatale précoce sévère."
+        },
+        {
+            title: "Cas Clinique 9 : Examen Cardio-Vasculaire du Nouveau-né",
+            context: "Lors de l'examen systématique d'un nouveau-né à terme au lit de sa mère à J1 de vie, vous pratiquez la palpation bilatérale des pouls fémoraux au pli de l'aine. Vous constatez une absence totale de perception de ces pouls fémoraux, alors que les pouls radiaux au niveau des membres supérieurs sont parfaitement bondissants et bien perçus.",
+            question: "Quelle anomalie congénitale devez-vous suspecter en priorité ?",
+            options: [
+                "Une paralysie du plexus brachial droit.",
+                "Une hernie inguinale unilatérale étranglée.",
+                "Une coarctation de l'aorte.",
+                "Un canal artériel persistant physiologique."
+            ],
+            correct: 2,
+            rationale: "L'abolition ou la diminution franche des pouls fémoraux contrastant avec la bonne perception des pouls aux membres supérieurs est le signe clinique majeur d'une coarctation de l'aorte (rétrécissement constitutionnel de l'aorte thoracique), nécessitant une échographie cardiaque."
+        },
+        {
+            title: "Cas Clinique 10 : Traumatisme Obstétrical des Membres",
+            context: "Un nouveau-né de 4 200 g est né par voie basse après une dystocie des épaules difficile résolue par des manœuvres obstétricales. Lors de l'examen initial en salle de naissance, vous observez que le membre supérieur droit du bébé reste immobile, collé au tronc en extension et rotation interne. Le réflexe de Moro est totalement asymétrique, absent du côté droit.",
+            question: "Quel est le diagnostic le plus probable de ce traumatisme obstétrical ?",
+            options: [
+                "Fracture uni ou bilatérale de la clavicule droite.",
+                "Paralysie du plexus brachial droit secondaire à l'étirement des racines nerveuses.",
+                "Syndrome dysmorphique constitutionnel de type trisomie 21.",
+                "Luxation congénitale vraie de l'articulation de la hanche."
+            ],
+            correct: 1,
+            rationale: "L'attitude du bras en extension, adduction et rotation interne ('bras de serveur'), associée à l'abolition unilatérale du réflexe de Moro après une dystocie des épaules, est caractéristique d'une paralysie du plexus brachial par étirement des racines nerveuses cervicales."
+        },
+        {
+            title: "Cas Clinique 11 : Malformation de la Paroi Abdominale",
+            context: "Vous accueillez un nouveau-né en salle de naissance. À l'inspection de l'abdomen, vous notez une large fente para-ombilicale située à droite du cordon ombilical. Les anses intestinales de l'enfant sont extériorisées hors de la cavité abdominale, flottent librement à nu et ne sont recouvertes par aucune membrane ni sac protecteur. Le cordon ombilical est normalement inséré à gauche de la lésion.",
+            question: "Quel est le diagnostic précis de cette malformation abdominale ?",
+            options: [
+                "Une hernie ombilicale simple avec anneau ouvert.",
+                "Un laparoschisis (ou gastroschisis).",
+                "Une omphalocèle volumineuse.",
+                "Une fossette sacrococcygienne profonde."
+            ],
+            correct: 1,
+            rationale: "L'extériorisation des viscères à nu, sans aucune membrane protectrice, à travers une fente située en dehors de l'ombilic (le plus souvent à droite), définit le laparoschisis (ou gastroschisis). L'omphalocèle, elle, est centrée sur l'ombilic et enveloppée dans un sac."
+        },
+        {
+            title: "Cas Clinique 12 : Examen Orthopédique (Dépistage des Hanches)",
+            context: "Vous réalisez l'examen des hanches d'une petite fille née en présentation du siège. En stabilisant le bassin d'une main et en imprimant un mouvement d'adduction couplé à une pression vers l'arrière avec l'autre main (manœuvre de Barlow), vous percevez un ressaut net de sortie de la tête fémorale hors de l'acétabulum. En relâchant la pression et en pratiquant une abduction (manœuvre d'Ortolani), vous percevez le ressaut inverse de réentrée.",
+            question: "Quelle est l'interprétation de cet examen clinique ?",
+            options: [
+                "L'articulation est normale, ce ressaut est un craquement ligamentaire bénin qui disparaîtra en 6 heures.",
+                "Instabilité de la hanche signant une luxation congénitale de la hanche dépistée ; nécessité d'une prise en charge orthopédique.",
+                "Paralysie définitive du plexus brachial inférieur.",
+                "Pied bot de type varus équin nécessitant des plâtres successifs."
+            ],
+            correct: 1,
+            rationale: "La perception d'un ressaut de sortie (Barlow) et de réentrée (Ortolani) traduit une instabilité articulaire majeure. C'est le signe pathognomonique du dépistage d'une luxation congénitale de la hanche, fréquente chez les filles nées en présentation du siège."
+        },
+        {
+            title: "Cas Clinique 13 : Surveillance Cardiorespiratoire (Aspiration)",
+            context: "En salle de naissance, juste après le dégagement d'un nouveau-né présentant un encombrement glaireux majeur, un étudiant introduit vigoureusement et profondément une sonde d'aspiration rigide au niveau du pharynx postérieur de l'enfant. Instantanément, le nouveau-né arrête de crier, devient hypotonique et son rythme cardiaque chute de 140 à 60 battements/minute.",
+            question: "Quel mécanisme physiologique explique cette aggravation brutale ?",
+            options: [
+                "Une infection bactérienne néonatale précoce foudroyante.",
+                "Un réflexe vagal majeur provoqué par la stimulation traumatique de la paroi pharyngée postérieure.",
+                "L'installation normale de l'acrocyanose des extrémités.",
+                "La crise génitale néonatale secondaire à l'imprégnation hormonale passive."
+            ],
+            correct: 1,
+            rationale: "Une stimulation trop profonde, rapide ou agressive de l'arrière-gorge stimule intensément les fibres du système parasympathique (nerf vague), entraînant un réflexe vagal immédiat avec bradycardie sévère et apnée."
+        },
+        {
+            title: "Cas Clinique 14 : Consultation Postnatale du 8ème jour",
+            context: "Mme R. se présente à la consultation du 8ème jour du post-partum précoce. Elle allaite exclusivement au sein. Lors de l'examen, elle se plaint d'une douleur vive au niveau du mollet droit. À la palpation, vous notez une douleur provoquée lors de la dorsiflexion forcée du pied droit (signe de Homans positif), associée à une perte du ballottement du mollet.",
+            question: "Quelle complication majeure devez-vous suspecter et quelle est la conduite à tenir ?",
+            options: [
+                "Une lymphangite aiguë du sein ; encourager l'allaitement et appliquer des compresses chaudes.",
+                "Une endométrite du post-partum ; réaliser un prélèvement de lochies vaginales.",
+                "Une thrombose veineuse profonde (phlébite) ; interdire le lever, confirmer par écho-doppler en urgence et débuter un traitement anticoagulant.",
+                "Une régression normale et physiologique de la crise génitale maternelle."
+            ],
+            correct: 2,
+            rationale: "Le post-partum est une période de haut risque thromboembolique. Un signe de Homans positif (douleur à la dorsiflexion du pied) associé à une diminution du ballottement du mollet indique une thrombose veineuse profonde. Il faut immobiliser la patiente pour éviter l'embolie pulmonaire."
+        },
+        {
+            title: "Cas Clinique 15 : Consultation Postnatale du 40ème jour",
+            context: "Une accouchée se présente à la consultation du 40ème jour. Elle vous confie qu'elle a repris les rapports sexuels avec son partenaire depuis une semaine. Elle n'allaite pas son enfant au sein (allaitement artificiel exclusif) et n'utilise aucune méthode contraceptive, pensant que l'absence de retour de couches (menstruations) la protège complètement de toute grossesse.",
+            question: "Quelle éducation sanitaire indispensable devez-vous lui prodiguer selon vos cours ?",
+            options: [
+                "La rassurer : l'aménorrhée du post-partum protège obligatoirement de la grossesse jusqu'au 3ème mois chez toutes les femmes.",
+                "L'informer qu'en l'absence d'allaitement maternel exclusif, une ovulation peut survenir dès la 4ème semaine post-partum ; il est urgent d'initier une méthode de planification familiale.",
+                "Lui conseiller d'attendre la consultation du 6ème mois pour débuter des micro-progestatifs.",
+                "Lui prescrire un dispositif intra-utérin (DIU) à insérer impérativement le jour même à domicile."
+            ],
+            correct: 1,
+            rationale: "En l'absence d'allaitement maternel exclusif, le retour de la fertilité (ovulation) est très précoce et peut se produire dès le 25ème jour post-partum, bien avant l'apparition du premier retour de couches visible. Un counseling en planification familiale est donc indispensable dès cette période."
+        }
+    ];
+
+    // Génération dynamique du HTML pour les cas cliniques
+    const container = document.getElementById('cases-container');
+
+    casesData.forEach((item, cIdx) => {
+        const caseCard = document.createElement('div');
+        caseCard.className = 'case-card';
+        caseCard.id = `case-${cIdx}`;
+
+        const title = document.createElement('div');
+        title.className = 'case-title';
+        title.innerText = item.title;
+        caseCard.appendChild(title);
+
+        const context = document.createElement('div');
+        context.className = 'case-context';
+        context.innerText = item.context;
+        caseCard.appendChild(context);
+
+        const qText = document.createElement('div');
+        qText.className = 'question-text';
+        qText.innerText = item.question;
+        caseCard.appendChild(qText);
+
+        const optionsOl = document.createElement('ul');
+        optionsOl.className = 'options-list';
+
+        item.options.forEach((optText, oIdx) => {
+            const optLi = document.createElement('li');
+            optLi.className = 'option';
+            optLi.innerHTML = `<strong>${String.fromCharCode(65 + oIdx)})</strong>&nbsp;&nbsp;${optText}`;
+            
+            // Événement au clic
+            optLi.addEventListener('click', () => checkCaseAnswer(cIdx, oIdx, item.correct, item.rationale));
+            optionsOl.appendChild(optLi);
+        });
+
+        caseCard.appendChild(optionsOl);
+
+        // Zone de feedback cachée au départ
+        const feedback = document.createElement('div');
+        feedback.className = 'feedback-box';
+        feedback.id = `fb-case-${cIdx}`;
+        caseCard.appendChild(feedback);
+
+        container.appendChild(caseCard);
+    });
+
+    // Fonction de vérification des cas
+    function checkCaseAnswer(caseIdx, selectedIdx, correctIdx, rationaleText) {
+        const caseCard = document.getElementById(`case-${caseIdx}`);
+        
+        if (caseCard.classList.contains('disabled')) return;
+        
+        caseCard.classList.add('disabled');
+        const optionsHTML = caseCard.querySelectorAll('.option');
+        const feedbackBox = document.getElementById(`fb-case-${caseIdx}`);
+
+        if (selectedIdx === correctIdx) {
+            optionsHTML[selectedIdx].classList.add('correct');
+            feedbackBox.className = 'feedback-box visible correct-feedback';
+            feedbackBox.innerHTML = `<strong>✨ Résolution correcte !</strong><br><br>${rationaleText}`;
+        } else {
+            optionsHTML[selectedIdx].classList.add('wrong');
+            optionsHTML[correctIdx].classList.add('correct');
+            feedbackBox.className = 'feedback-box visible wrong-feedback';
+            feedbackBox.innerHTML = `<strong>❌ Erreur de diagnostic/conduite.</strong> La bonne option était la <strong>${String.fromCharCode(65 + correctIdx)}</strong>.<br><br><strong>Analyse du cas :</strong> ${rationaleText}`;
+        }
+    }
+</script>
+
+</body>
+</html>
