@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Interactif - Pratiques Obstétricales</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --error: #c0392b;
+            --bg: #f4f7f6;
+            --card-bg: #ffffff;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            border-bottom: 4px solid var(--secondary);
+            padding-bottom: 15px;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            font-style: italic;
+            margin-bottom: 30px;
+        }
+        .quiz-item {
+            background: #fff;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        .question-text {
+            font-weight: 600;
+            font-size: 1.1em;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        .options-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .option {
+            padding: 12px 15px;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: transform 0.1s, background 0.2s, border-color 0.2s;
+            display: flex;
+            align-items: center;
+        }
+        .option:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            transform: translateX(4px);
+        }
+        /* Classes dynamiques appliquées en JS */
+        .quiz-item.disabled .option {
+            pointer-events: none; /* Désactive les clics après réponse */
+        }
+        .option.correct {
+            background: #d1fae5 !important;
+            border-color: var(--success) !important;
+            color: #065f46;
+            font-weight: bold;
+        }
+        .option.wrong {
+            background: #fee2e2 !important;
+            border-color: var(--error) !important;
+            color: #991b1b;
+        }
+        .feedback-box {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 6px;
+            font-size: 0.95em;
+            display: none; /* Caché par défaut */
+            animation: fadeIn 0.4s ease;
+        }
+        .feedback-box.visible {
+            display: block;
+        }
+        .feedback-box.correct-feedback {
+            background: #ecfdf5;
+            border-left: 5px solid var(--success);
+            color: #065f46;
+        }
+        .feedback-box.wrong-feedback {
+            background: #fffaf0;
+            border-left: 5px solid #f59e0b;
+            color: #78350f;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #94a3b8;
+            font-size: 0.85em;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>50 QCM Interactifs - Pratiques Obstétricales</h1>
+    <div class="subtitle">Cliquez directement sur l'option de votre choix pour vérifier la réponse instantanément.</div>
+
+    <div id="quiz-container"></div>
+
+    <footer>
+        Université de Tunis-El Manar - ESTST - Module Pratiques Obstétricales.
+    </footer>
+</div>
+
+<script>
+    // Base de données des 50 questions
+    const qcmData = [
+        {
+            q: "1. Quelle est la définition exacte de la deuxième phase du travail (l'expulsion) selon vos cours ?",
+            options: [
+                "Elle s'étend du début des contractions utérines jusqu'à la dilatation complète du col.",
+                "Elle s'étend de la dilatation complète du col utérin jusqu'à l'expulsion totale du fœtus.",
+                "Elle correspond à la période d'expulsion des annexes embryonnaires (placenta et membranes).",
+                "Elle englobe le passage de la présentation à travers le seul détroit supérieur."
+            ],
+            correct: 1,
+            rationale: "L'expulsion commence précisément dès que le col utérin atteint sa dilatation complète (10 cm) et prend fin au moment de la sortie complète de l'enfant hors des voies génitales maternelles."
+        },
+        {
+            q: "2. En moyenne, quelle est la durée normale de la phase d'expulsion chez une femme primipare ?",
+            options: [
+                "5 minutes",
+                "15 minutes",
+                "30 minutes",
+                "60 minutes"
+            ],
+            correct: 2,
+            rationale: "Les tissus du périnée d'une primipare offrent une plus grande résistance. Le cours stipule une durée moyenne de 30 minutes chez la primipare et de 15 minutes chez la multipare."
+        },
+        {
+            q: "3. Laquelle des propositions suivantes N'EST PAS une condition nécessaire à la réalisation de l'expulsion naturelle ?",
+            options: [
+                "La poche des eaux doit être rompue.",
+                "La dilatation du col utérin doit être complète.",
+                "La présentation céphalique doit être engagée et au détroit inférieur.",
+                "La perfusion systématique d'oxytocine doit être en cours."
+            ],
+            correct: 3,
+            rationale: "L'oxytocine est une intervention médicale active. L'expulsion physiologique demande juste la dilatation complète, la poche rompue, la présentation engagée et orientée au détroit inférieur."
+        },
+        {
+            q: "4. Lors de l'expulsion, comment se modifie cliniquement la longueur ano-vulvaire du périnée sous l'effet de l'ampliation ?",
+            options: [
+                "Elle reste stable à environ 3 à 4 cm.",
+                "Elle se raccourcit pour faciliter le passage.",
+                "Elle s'allonge de 3-4 cm de base pour atteindre 10 cm ou plus.",
+                "Elle s'oblitère totalement sous l'effet du coccyx."
+            ],
+            correct: 2,
+            rationale: "Sous la poussée de la tête fœtale, le plancher périnéal subit une distension majeure vers l'avant et l'arrière, la distance ano-vulvaire augmentant considérablement pour atteindre environ 10 cm."
+        },
+        {
+            q: "5. Quel signe clinique discret traduit spécifiquement le passage de l'anneau vulvaire chez la primipare ?",
+            options: [
+                "L'émission d'un filet de sang annonçant la rupture des vestiges hyménéaux.",
+                "Une débâcle urinaire par compression sphinctérienne.",
+                "La disparition immédiate de l'envie irrépressible de pousser.",
+                "Une diminution soudaine de la béance de l'orifice anal."
+            ],
+            correct: 0,
+            rationale: "Lors du premier accouchement, le franchissement maximal de l'anneau vulvaire provoque la rupture des vestiges de l'hymen, visible cliniquement par un mince filet de sang caractéristique."
+        },
+        {
+            q: "6. Quelle recommandation essentielle la sage-femme doit-elle donner à la patiente au moment exact du dégagement de la tête ?",
+            options: [
+                "Pousser de toutes ses forces en apnée bloquée.",
+                "Arrêter immédiatement de pousser et souffler.",
+                "Pratiquer une poussée expiratoire rapide en fléchissant le bassin.",
+                "Bloquer sa respiration pendant plus de 30 secondes."
+            ],
+            correct: 1,
+            rationale: "Pour éviter une expulsion brutale ('en boulet de canon') destructrice pour les sphincters et le périnée, la patiente doit cesser tout effort expulsif et souffler longuement pendant la déflexion finale."
+        },
+        {
+            q: "7. Lors du dégagement du corps fœtal, quelle structure anatomique se dégage chronologiquement en premier après la tête ?",
+            options: [
+                "L'épaule antérieure, fixée sous la symphyse pubienne.",
+                "L'épaule postérieure, au niveau de la fourchette vulvaire.",
+                "Le tronc et le siège de manière simultanée.",
+                "Les deux membres supérieurs ensemble."
+            ],
+            correct: 0,
+            rationale: "Après la rotation de restitution de la tête, l'épaule antérieure vient se caler comme pivot sous la symphyse pubienne pour glisser en premier, suivie par l'épaule postérieure."
+        },
+        {
+            q: "8. Pourquoi préconise-t-on le rasage des grandes lèvres et du périnée lors de la préparation à l'expulsion ?",
+            options: [
+                "Pour accélérer physiologiquement le réflexe de poussée.",
+                "Pour mieux contrôler le dégagement et réaliser une épisiotomie dans de bonnes conditions.",
+                "Pour induire une réduction immédiate de la taille de l'orifice anal.",
+                "Pour éviter l'asphyxie fœtale au cours du va-et-vient périnéal."
+            ],
+            correct: 1,
+            rationale: "Le nettoyage et le rasage local offrent une visibilité optimale de la distension périnéale et assurent des conditions d'asepsie chirurgicale idéales en cas de nécessité d'épisiotomie ou de déchirure."
+        },
+        {
+            q: "9. Quelle est la fréquence recommandée pour la surveillance du Rythme Cardiaque Fœtal (RCF) au cours de la phase d'expulsion ?",
+            options: [
+                "Toutes les 15 minutes au repos.",
+                "Idéalement toutes les 5 minutes (ou après chaque contraction utérine).",
+                "Uniquement si la durée de l'expulsion dépasse 30 minutes.",
+                "Toutes les 2 minutes de manière continue, uniquement par spéculum."
+            ],
+            correct: 1,
+            rationale: "La phase d'expulsion expose fortement le fœtus à l'hypoxie et à l'acidose en raison des compressions répétées. Une auscultation très rapprochée (toutes les 5 minutes ou après chaque CU) est requise."
+        },
+        {
+            q: "10. Quelle anomalie du RCF après une contraction utérine impose une vigilance extrême et une prise en charge immédiate ?",
+            options: [
+                "Une variabilité oscillant strictement entre 110 et 150 battements/min.",
+                "Une accélération transitoire culminant à 160 battements/min.",
+                "Un rythme cardiaque fœtal inférieur à 100 ou supérieur à 180 battements/min.",
+                "Un rythme stabilisé à exactement 140 battements/min."
+            ],
+            correct: 2,
+            rationale: "Une bradycardie sévère (<100 bpm) ou une tachycardie majeure (>180 bpm) en phase d'expulsion traduisent une souffrance fœtale aiguë immédiate nécessitant d'accélérer la naissance."
+        },
+        {
+            q: "11. Quels sont les deux types de techniques de poussées expulsives décrites dans les protocoles cliniques ?",
+            options: [
+                "La poussée en décubitus latéral et la poussée assistée par ventouse.",
+                "La poussée en apnée (bloquée) et la poussée en expiration (physiologique).",
+                "La poussée continue d'emblée et la poussée alternée par cycles de 5 minutes.",
+                "La poussée périnéale exclusive et la poussée diaphragmatique pure."
+            ],
+            correct: 1,
+            rationale: "Le cours oppose la poussée classique en apnée bloquée (inspiration, blocage de l'air et effort de poussée vers le bas) et la poussée expiratoire plus physiologique (pousser tout en soufflant)."
+        },
+        {
+            q: "12. Quelle est la définition biologique et clinique exacte de la délivrance ?",
+            options: [
+                "L'ensemble des phénomènes mécaniques conduisant à la naissance de l'enfant.",
+                "La période d'adaptation immédiate du nouveau-né à la vie extra-utérine.",
+                "L'expulsion hors des voies génitales des annexes fœtales (placenta et membranes).",
+                "La fermeture définitive de l'orifice interne du col utérin."
+            ],
+            correct: 2,
+            rationale: "La délivrance est la troisième phase de l'accouchement. Elle correspond spécifiquement à la séparation et à l'évacuation du placenta et des membranes amniotiques hors de l'utérus."
+        },
+        {
+            q: "13. Chronologiquement, quelles sont les trois phases physiologiques successives de la délivrance naturelle ?",
+            options: [
+                "La rémission clinique, l'ascension utérine et l'atonie secondaire.",
+                "La rupture des membranes, l'engagement placentaire et le globe de sécurité.",
+                "Le décollement du placenta, la migration/expulsion et la rétraction utérine.",
+                "L'hématome physiologique, la manœuvre de refoulement et la pesée."
+            ],
+            correct: 2,
+            rationale: "Le processus physiologique immuable se fait en 3 temps : Décollement (séparation de la paroi), Migration/Expulsion (descente dans le vagin et sortie), puis Rétraction (contraction pour l'hémostase)."
+        },
+        {
+            q: "14. À quoi correspond la période de « rémission clinique » au cours de la délivrance et quelle est sa durée moyenne ?",
+            options: [
+                "Une phase de contractions utérines douloureuses intenses durant de 2 à 5 minutes.",
+                "Un repos physiologique passif durant en moyenne 10 à 15 minutes.",
+                "Le temps nécessaire à la cicatrisation immédiate du vagin en salle de naissance.",
+                "La phase d'aspiration et de réanimation du nouveau-né sur la table chauffante."
+            ],
+            correct: 1,
+            rationale: "Juste après la sortie de l'enfant, l'utérus marque une pause temporaire sans contractions douloureuses ressenties par la mère. Cette phase dure normalement 10 à 15 minutes."
+        },
+        {
+            q: "15. Quel phénomène anatomique assure le clivage entre le placenta et la paroi de l'utérus lors du décollement ?",
+            options: [
+                "L'ouverture chirurgicale du sinus marginal sous spéculum.",
+                "La constitution d'un hématome rétro-placentaire physiologique dans la caduque.",
+                "La traction continue et vigoureuse exercée sur le cordon ombilical.",
+                "L'involution forcée provoquée par la miction spontanée."
+            ],
+            correct: 1,
+            rationale: "La reprise des contractions utérines sur un utérus partiellement vidé réduit la zone d'insertion du placenta. Cela entraîne la rupture des vaisseaux utéro-placentaires et crée un hématome de clivage physiologique."
+        },
+        {
+            q: "16. Comment se nomme le mode de délivrance le plus fréquent où le placenta s'extériorise en présentant sa face fœtale (lisse) en premier ?",
+            options: [
+                "Le mode Baudelocque",
+                "Le mode Duncan",
+                "Le mode Credé",
+                "Le mode Freud"
+            ],
+            correct: 0,
+            rationale: "Dans le mode Baudelocque (le plus fréquent, insertions hautes), le placenta se décolle par son centre et se retourne en sac, montrant sa face fœtale bleutée. Le mode Duncan montre la face maternelle rouge."
+        },
+        {
+            q: "17. Quels facteurs de coagulation, augmentés en fin de grossesse, facilitent l'hémostase lors de la délivrance ?",
+            options: [
+                "Les facteurs I, II et V",
+                "L'antithrombine III et la protéine C",
+                "Le fibrinogène et les facteurs VII, VIII et IX",
+                "Les plaquettes sanguines et le facteur XII exclusivement"
+            ],
+            correct: 2,
+            rationale: "La fin de la grossesse est un état d'hypercoagulabilité physiologique destiné à limiter l'hémorragie de la délivrance grâce à l'élévation marquée du fibrinogène et des facteurs VII, VIII et IX."
+        },
+        {
+            q: "18. Quelle condition utérine est absolument indispensable pour que les mécanismes d'hémostase et de rétraction soient efficaces ?",
+            options: [
+                "La persistance d'un reliquat de membranes de moins de 10 cm.",
+                "La vacuité totale de la cavité utérine.",
+                "Le maintien d'une atonie partielle pour éviter la douleur.",
+                "L'absence totale de caillots sanguins microbiens."
+            ],
+            correct: 1,
+            rationale: "Si un morceau de cotylédon ou de membrane reste à l'intérieur, les fibres musculaires ne peuvent pas se resserrer complètement pour occlure les vaisseaux sanguins ouverts (ligatures vivantes de Pinard). La vacuité doit être absolue."
+        },
+        {
+            q: "19. Parmi les signes suivants, lequel N'EST PAS un signe annonciateur classique du décollement placentaire ?",
+            options: [
+                "La reprise des contractions utérines.",
+                "L'allongement de la portion extériorisée du cordon ombilical.",
+                "L'ascension transitoire du fond utérin au-dessus de l'ombilic.",
+                "Le redressement statique immédiat des membres inférieurs du nouveau-né."
+            ],
+            correct: 3,
+            rationale: "Le redressement du nouveau-né est un réflexe neurologique de l'enfant. Les vrais signes utérins sont : contractions, petit filet de sang, allongement du cordon et remontée transitoire du fond de l'utérus."
+        },
+        {
+            q: "20. Quelle manœuvre clinique simple permet d'acquérir la certitude que le placenta est totalement décollé ?",
+            options: [
+                "La manœuvre de Barlow sur le bassin de l'accouchée.",
+                "La manœuvre du refoulement utérin (pression sus-pubienne vers le haut).",
+                "Une expression utérine brutale immédiate.",
+                "L'ablation systématique des points de suture de l'épisiotomie."
+            ],
+            correct: 1,
+            rationale: "En poussant l'utérus vers le haut avec la main posée au-dessus de la symphyse pubienne : si le cordon ne remonte pas en même temps, c'est que le placenta est libre dans le segment inférieur ou le vagin."
+        },
+        {
+            q: "21. Qu'est-ce que le « globe de sécurité » utérin observé immédiatement après la délivrance ?",
+            options: [
+                "Une complication caractérisée par un utérus mou et distendu.",
+                "Un utérus tonique, dur, fortement contracté et situé sous l'ombilic.",
+                "Une masse tumorale bénigne liée aux œstrogènes.",
+                "Le gonflement de la vessie secondaire à une rétention d'urine."
+            ],
+            correct: 1,
+            rationale: "Le globe de sécurité est l'état normal recherché juste après l'expulsion du délivre. L'utérus se rétracte sous forme d'une masse très ferme, ronde et ligneuse sous l'ombilic, garantissant l'arrêt des saignements."
+        },
+        {
+            q: "22. Comment définit-on cliniquement la « rétention placentaire complète » ?",
+            options: [
+                "La persistance d'un seul cotylédon manquant à l'examen.",
+                "Le non-décollement ou la non-expulsion du placenta 30 minutes après la naissance.",
+                "La perte de plus de 500 mL de sang dans les deux heures post-partum.",
+                "L'enchatonnement du placenta au niveau exclusif du vagin."
+            ],
+            correct: 2,
+            rationale: "La rétention est avérée si le placenta n'est toujours pas expulsé de manière naturelle ou dirigée après un délai d'attente de 30 minutes. Cela impose une délivrance artificielle."
+        },
+        {
+            q: "23. Quelle est la nature de l'examen du délivre effectué en salle de naissance ?",
+            options: [
+                "Un examen microscopique systématique envoyé en laboratoire sous 48 heures.",
+                "Un examen macroscopique immédiat des annexes (placenta, membranes, cordon) ayant une valeur médico-légale.",
+                "Une mesure exclusive de la quantité de sang contenue dans le sac collecteur.",
+                "Un examen obligatoire visant uniquement à déterminer le groupe rhésus de l'enfant."
+            ],
+            correct: 1,
+            rationale: "C'est un examen macroscopique visuel et palpatoire obligatoire, immédiat et minutieux, consigné par la sage-femme ou le médecin pour certifier l'intégrité du délivre et protéger sa responsabilité médico-légale."
+        },
+        {
+            q: "24. Quelles sont les dimensions normales moyennes d'un placenta humain à terme ?",
+            options: [
+                "10 cm de diamètre et 5 cm d'épaisseur uniforme.",
+                "Environ 20 cm de diamètre, 2 à 3 cm d'épaisseur au centre.",
+                "50 cm de diamètre pour un poids fixe de 1 500 grammes.",
+                "Un diamètre variable ne dépassant jamais l'épaisseur de la symphyse."
+            ],
+            correct: 1,
+            rationale: "Un placenta mature normal à terme se présente comme un disque charnu mesurant en moyenne 15 à 20 cm de diamètre, pour une épaisseur centrale de 2 à 3 cm s'amincissant vers les bords."
+        },
+        {
+            q: "25. Lors de l'examen de la face fœtale (plaque choriale), quel aspect doit-elle présenter ?",
+            options: [
+                "Rugueuse, rouge charnue et divisée en plusieurs sillons profonds.",
+                "Lisse, luisante, de couleur bleutée, laissant apparaître les vaisseaux placentaires.",
+                "Jaunâtre, parsemée de calcifications dures et de dépôts de fibrine.",
+                "Recouverte intégralement par la gelée de Wharton et dépourvue de ramifications."
+            ],
+            correct: 1,
+            rationale: "La face fœtale est recouverte par l'amnios, ce qui lui donne un aspect lisse, transparent et brillant. On y voit converger les ramifications des vaisseaux ombilicaux."
+        },
+        {
+            q: "26. De combien de membranes avasculaires se compose le délivre normal ?",
+            options: [
+                "Three membranes : l'amnios, le chorion et la caduque profonde.",
+                "Une seule membrane fusionnée appelée la membrane amniotique pure.",
+                "Deux membranes : l'amnios (interne) et le chorion (externe).",
+                "Quatre feuillets issus directement de la vésicule vitelline."
+            ],
+            correct: 2,
+            rationale: "Le sac amniotique comporte deux feuillets distincts : l'amnios à l'intérieur (luisant et au contact du liquide) et le chorion à l'extérieur (mat, en contact avec la muqueuse utérine)."
+        },
+        {
+            q: "27. Quels éléments vasculaires constituent le cordon ombilical normal ?",
+            options: [
+                "Une artère ombilicale unique et deux veines ombilicales.",
+                "Deux artères ombilicales et une veine ombilicale, entourées de gelée de Wharton.",
+                "Un réseau de capillaires symétriques sans axe veineux.",
+                "Deux veines et deux artères englobées dans la caduque basale."
+            ],
+            correct: 1,
+            rationale: "Le cordon normal contient anatomiquement 2 artères (qui ramènent le sang vicié vers le placenta) et 1 veine (qui apporte le sang oxygéné au fœtus), protégées par la gelée de Wharton."
+        },
+        {
+            q: "28. Qu'est-ce qu'une « insertion vélamenteuse » du cordon ombilical et quel est son risque ?",
+            options: [
+                "Une insertion parfaitement centrée au milieu de la plaque choriale.",
+                "Une insertion sur les membranes (hors du placenta), avec risque de rupture des vaisseaux (Benckiser).",
+                "Une insertion sur le bord immédiat du placenta appelée aussi insertion en raquette.",
+                "Une insertion directement sur la paroi musculaire utérine."
+            ],
+            correct: 1,
+            rationale: "Les vaisseaux du cordon cheminent de façon anormale à nu sur les membranes sans protection. Si ces membranes rompent au niveau d'un vaisseau, cela provoque l'hémorragie de Benckiser, souvent fatale pour le fœtus."
+        },
+        {
+            q: "29. Quelles sont les valeurs seuils définissant un cordon anormalement court ou long selon vos cours ?",
+            options: [
+                "Court si inférieur à 10 cm ; long si supérieur à 150 cm.",
+                "Court si inférieur à 30 cm ; long si supérieur à 70 cm.",
+                "Court si inférieur à 50 cm ; long si supérieur à 52 cm.",
+                "Les anomalies de longueur n'existent pas (toujours 50 cm)."
+            ],
+            correct: 2,
+            rationale: "La longueur moyenne est de 50 cm. En dessous de 30 cm, le cordon est considéré comme court (risque de non-descente ou décollement). Au-dessus de 70 cm, il est long (risques de nœuds, circulaires, procidence)."
+        },
+        {
+            q: "30. Lors de l'examen des membranes, que témoigne la mise en évidence d'un « petit côté » inférieur ou égal à 10 cm ?",
+            options: [
+                "Une macrosomie fœtale associée à un hydramnios aigu.",
+                "Une rupture prématurée des membranes survenue avant le travail.",
+                "Rétrospectivement, la présence d'un placenta bas-inséré.",
+                "Une infection chorioamniotique d'origine bactérienne."
+            ],
+            correct: 2,
+            rationale: "Le petit côté correspond à la distance entre la déchirure et le bord du placenta. S'il fait moins de 10 cm, cela prouve a posteriori que le placenta siégeait très près du col de l'utérus (bas-inséré)."
+        },
+        {
+            q: "31. Quelle anomalie de coloration des membranes oriente immédiatement vers une chorioamniotite (infection intra-utérine) ?",
+            options: [
+                "Des membranes de couleur verdâtre translucide.",
+                "Des membranes jaunâtres lisses.",
+                "Des membranes d'aspect « sales ».",
+                "Des membranes parfaitement transparentes et bleutées."
+            ],
+            correct: 2,
+            rationale: "Le cours précise les couleurs : des membranes d'aspect 'sales' traduisent une chorioamniotite. Le verdâtre évoque du méconium (souffrance fœtale) et le jaunâtre une iso-immunisation Rh ou un fœtus mort in utero."
+        },
+        {
+            q: "32. Quel est le rapport de poids normal attendu entre le délivre et le nouveau-né à terme ?",
+            options: [
+                "Le poids du placenta est égal à la moitié (1/2) du poids fœtal.",
+                "Le poids du placenta et des membranes est égal au sixième (1/6) du poids fœtal.",
+                "Le poids du placenta est strictement identique au périmètre crânien.",
+                "Le poids du placenta correspond au tiers (1/3) de la taille."
+            ],
+            correct: 1,
+            rationale: "Physiologiquement, le placenta représente environ 1/6ème du poids de l'enfant à terme. Pour un bébé de 3000g, le placenta pèse environ 500g."
+        },
+        {
+            q: "33. Quels sont les trois grands objectifs visés par les soins systématiques dispensés au nouveau-né à la naissance ?",
+            options: [
+                "Assurer la transition extra-utérine, prévenir les infections et dépister les pathologies précoces.",
+                "Mesurer la taille, administrer le BCG et déclarer l'état civil dans l'heure.",
+                "Pratiquer la manœuvre de Barlow, injecter l'oxytocine et isoler l'enfant.",
+                "Évaluer l'Apgar à 24 heures, peser l'alèse et réaliser l'échographie."
+            ],
+            correct: 0,
+            rationale: "La prise en charge initiale en salle de naissance répond strictement à ces trois impératifs : aider à l'adaptation cardiorespiratoire, maintenir une asepsie rigoureuse et dépister d'emblée les anomalies visibles."
+        },
+        {
+            q: "34. Quelles sont les trois règles fondamentales à respecter impérativement lors de l'accueil du nouveau-né ?",
+            options: [
+                "Flexion, cri immédiat et pesée instantanée.",
+                "Alimentation précoce, isolement et ventilation forcée.",
+                "Normothermie, asepsie et sécurité.",
+                "Décubitus ventral, aspiration gastrique et vitamine D."
+            ],
+            correct: 2,
+            rationale: "Le cours insiste sur la triade obligatoire d'accueil : la Normothermie (essuyer l'enfant, peau à peau), l'Asepsie (lavage des mains, matériel propre) et la Sécurité (vigilance constante et monitorat visuel)."
+        },
+        {
+            q: "35. Quelle doit être la température cutanée normale d'un nouveau-né et celle de la salle de naissance ?",
+            options: [
+                "Enfant entre 35°C et 36°C ; salle à 20°C minimum.",
+                "Enfant entre 36°5 et 37°C ; salle entre 25°C et 26°C.",
+                "Enfant à 38°C fixe ; salle à 18°C pour ventiler.",
+                "La température de la pièce n'a aucun impact."
+            ],
+            correct: 1,
+            rationale: "Le nouveau-né se refroidit très vite à cause du liquide amniotique qui s'évapore. Sa température doit rester entre 36.5°C et 37°C, ce qui nécessite une salle chauffée à 25-26°C, portes closes."
+        },
+        {
+            q: "36. Lors de la libération des voies aériennes supérieures, quel positionnement initial de l'enfant est requis ?",
+            options: [
+                "En décubitus ventral strict, la tête tournée vers la gauche.",
+                "En décubitus dorsal, le cou en extension modérée (alignement des axes).",
+                "En position assise, maintenu par les épaules.",
+                "En décubitus dorsal, le cou en hyperflexion forcée."
+            ],
+            correct: 1,
+            rationale: "Pour dégager efficacement le pharynx et libérer les sécrétions, l'enfant doit être sur le dos, la tête droite avec le cou en légère extension (position de sécurité ou d'alignement pharyngo-trachéal)."
+        },
+        {
+            q: "37. Quel risque comporte une aspiration trop profonde ou brutale de la paroi postérieure du pharynx à la naissance ?",
+            options: [
+                "Une poussée d'érythème toxique généralisé.",
+                "La calcification précoce d'un céphalhématome.",
+                "Un réflexe vagal responsable d'une bradycardie sévère et/ou d'apnée.",
+                "Une fermeture immédiate de la fontanelle antérieure."
+            ],
+            correct: 2,
+            rationale: "La stimulation de l'arrière-gorge profonde peut exciter le nerf vague, ce qui déclenche un réflexe parasympathique violent : bradycardie brutale ou arrêt respiratoire de l'enfant."
+        },
+        {
+            q: "38. Quels sont les 5 critères cliniques évalués par le score d'Apgar ?",
+            options: [
+                "Artères, Pouls, Glabelle, Abdomen, Rachis.",
+                "Apparence (coloration), Pouls (fréquence cardiaque), Grimace (réactivité), Activité (tonus), Respiration.",
+                "Angle poplité, Poids, Grasping, Appendice, Moro.",
+                "Asepsie, Périnée, Grossesse, Allaitement, Sexe."
+            ],
+            correct: 1,
+            rationale: "L'acronyme universel APGAR signifie : Apparence (couleur), Pouls (rythme), Grimace (réflexes aux stimuli), Activité (tonus musculaire au repos) et Respiration."
+        },
+        {
+            q: "39. Comment interprète-t-on un score d'Apgar compris entre 4 et 6 à la première minute ?",
+            options: [
+                "Adaptation normale et excellente à la vie extra-utérine.",
+                "Un état d'asphyxie périnatale modérée nécessitant des gestes de réanimation.",
+                "Un état de mort apparente exigeant un transfert neurochirurgical.",
+                "Une infection néonatale précoce liée à un spina bifida."
+            ],
+            correct: 1,
+            rationale: "Un score de 7 à 10 est normal. Entre 4 et 6, il y a une détresse modérée (asphyxie périnatale) exigeant des soins de réanimation (ventilation au masque, oxygène). Un score ≤ 3 indique une mort apparente."
+        },
+        {
+            q: "40. À la naissance, quelles sont les mensurations moyennes normales d'un nouveau-né sain à terme ?",
+            options: [
+                "Poids : 2 500 g ; Taille : 45 cm ; PC : 30 cm.",
+                "Poids : 3 500 g ; Taille : 50 cm ; PC : 35 cm.",
+                "Poids : 4 500 g ; Taille : 55 cm ; PC : 40 cm.",
+                "Les mensurations ne se mesurent jamais avant le 40ème jour."
+            ],
+            correct: 1,
+            rationale: "Les normes anthropométriques moyennes d'un nouveau-né à terme en bonne santé sont idéalement fixées à 3,5 kg pour le poids, 50 cm pour la taille et 35 cm pour le périmètre crânien (PC)."
+        },
+        {
+            q: "41. Qu'est-ce que l'« acrocyanose » physiologique chez le nouveau-né ?",
+            options: [
+                "Une coloration bleue généralisée des muqueuses et du tronc liée à une cardiopathie.",
+                "Un aspect cyanotique isolé des seules extrémités (mains/pieds) suite à une instabilité vasomotrice transitoire.",
+                "Une coloration jaune de la peau liée à une desquamation.",
+                "Une éruption pustuleuse transitoire siégeant sur le nez."
+            ],
+            correct: 1,
+            rationale: "L'acrocyanose est fréquente et bénigne durant les premières heures : les pieds et mains restent bleutés à cause du froid ou d'une vasoconstriction périphérique, tandis que le thorax et le visage sont bien roses."
+        },
+        {
+            q: "42. Quelle anomalie cardiovasculaire néonatale doit faire suspecter une absence de perception des pouls fémoraux ?",
+            options: [
+                "Un souffle systolique fonctionnel bénin.",
+                "Une coarctation de l'aorte.",
+                "Une paralysie définitive du plexus brachial.",
+                "Une persistance exclusive du canal artériel."
+            ],
+            correct: 1,
+            rationale: "La recherche des pouls fémoraux (au pli de l'aine) est obligatoire. Si on ne les sent pas ou s'ils sont très faibles par rapport aux membres supérieurs, cela évoque fortement une coarctation (rétrécissement) de l'aorte."
+        },
+        {
+            q: "43. Quelle est la différence clinique majeure entre une bosse sérosanguine et un céphalhématome ?",
+            options: [
+                "La bosse sérosanguine respecte les limites des os alors que le céphalhématome les chevauche.",
+                "La bosse sérosanguine est superficielle et chevauche les sutures, tandis que le céphalhématome est sous-périosté et limité strictement par les sutures d'un os.",
+                "Le céphalhématome disparaît en 2 jours et la bosse met plusieurs mois.",
+                "La bosse sérosanguine est une urgence neurochirurgicale immédiate."
+            ],
+            correct: 1,
+            rationale: "La bosse sérosanguine est une infiltration diffuse du cuir chevelu qui passe au-dessus des sutures osseuses et s'efface vite. Le céphalhématome est un hématome sous-périosté bloqué par les sutures de l'os concerné, long à régresser."
+        },
+        {
+            q: "44. Quelle malformation congénitale de la paroi abdominale se caractérise par la hernie des viscères recouverts par un sac translucide centré sur le cordon ?",
+            options: [
+                "L'omphalocèle",
+                "Le laparoschisis (ou gastroschisis)",
+                "La hernie inguinale simple",
+                "L'hydrops fœtal"
+            ],
+            correct: 0,
+            rationale: "L'omphalocèle est un défaut de fermeture de la paroi abdominale au niveau de l'ombilic : les organes sortent mais restent protégés à l'intérieur d'un sac membraneux. Dans le laparoschisis, les anses intestinales sont totalement à nu à côté du cordon."
+        },
+        {
+            q: "45. Lors de l'examen du tonus passif, quelles caractéristiques décrivent une « manœuvre du foulard » normale chez un enfant à terme ?",
+            options: [
+                "La main de l'enfant franchit l'épaule opposée sans aucune résistance.",
+                "Une résistance saine empêche le coude de franchir la ligne médiane du corps.",
+                "L'avant-bras reste figé en extension totale permanente.",
+                "Elle provoque une ouverture des doigts en éventail avec cri."
+            ],
+            correct: 1,
+            rationale: "Le nouveau-né à terme présente une hypertonie physiologique des muscles fléchisseurs. En tirant son bras vers l'épaule opposée (foulard), le coude ne doit pas dépasser la ligne médiane du sternum."
+        },
+        {
+            q: "46. Quelle est la valeur normale de l'« angle poplité » explorant le tonus passif des membres inférieurs chez le nouveau-né à terme ?",
+            options: [
+                "Strictement supérieur à 150°",
+                "Égal à 180° de manière bilatérale",
+                "Inférieur ou égal à 90°",
+                "Entre 120° et 140° chez le prématuré"
+            ],
+            correct: 2,
+            rationale: "En étendant la jambe sur la cuisse, l'angle poplité normal d'un bébé à terme est fermé (≤ 90°) à cause de la résistance de ses muscles fléchisseurs. Un angle très ouvert (> 90° à 120°) traduit une hypotonie ou une prématurité."
+        },
+        {
+            q: "47. Laquelle des propositions suivantes correspond à un réflexe archaïque (automatisme primaire) normal ?",
+            options: [
+                "La manœuvre d'Ortolani positive.",
+                "Le signe de Homans douloureux.",
+                "Le réflexe de Moro (réflexe de défense/embrassement) provoqué pour évaluer le SNC.",
+                "La fermeture spontanée de la fontanelle antérieure à J2."
+            ],
+            correct: 2,
+            rationale: "Le réflexe de Moro est un automatisme primaire essentiel. Déclenché par un stimulus de surprise, il montre une ouverture des bras puis un mouvement d'embrassement, attestant le bon état du tronc cérébral et du SNC."
+        },
+        {
+            q: "48. Durant le post-partum immédiat (les 2 premières heures), à quelle fréquence minimale doit-on surveiller la mère ?",
+            options: [
+                "Toutes les heures pendant 6 heures.",
+                "Toutes les 15 minutes pendant les deux heures.",
+                "Une seule fois au moment du premier lever précoce.",
+                "Uniquement si le saignement dépasse une serviette hygiénique."
+            ],
+            correct: 1,
+            rationale: "Les deux premières heures post-partum sont la période critique du risque d'hémorragie par atonie utérine. La surveillance (pouls, TA, saignements, globe utérin de sécurité) doit être faite obligatoirement toutes les 15 minutes."
+        },
+        {
+            q: "49. Quels sont les objectifs spécifiques de la consultation postnatale obligatoire du 8ème jour ?",
+            options: [
+                "Poser un stérilet immédiat et arrêter l'allaitement.",
+                "Pratiquer la rééducation systématique du périnée et injecter la vitamine K à la mère.",
+                "Vérifier la cicatrisation périnéale, l'involution utérine, l'absence de complications infectieuses/thromboemboliques maternelles et examiner le nouveau-né.",
+                "Réaliser le frottis du col et vacciner le nourrisson contre l'hépatite B uniquement."
+            ],
+            correct: 2,
+            rationale: "La consultation de J8 (post-partum précoce) sert à dépister les complications de retour à domicile : endométrite, infection de cicatrice d'épisiotomie, lymphangite mammaire, phlébite (signe de Homans), tout en contrôlant la croissance du bébé."
+        },
+        {
+            q: "50. Quel dépistage malformatif non évident est capital lors de l'examen complet du nourrisson au 40ème jour ?",
+            options: [
+                "Le dépistage exclusif du strabisme physiologique intermittent.",
+                "La recherche d'un appendice prétragien isolé.",
+                "Le dépistage d'anomalies cliniques non évidentes comme une cardiopathie congénitale ou une luxation congénitale de la hanche.",
+                "L'évaluation de la desquamation modérée de la peau."
+            ],
+            correct: 2,
+            rationale: "À l'étape du post-partum tardif (40ème jour), l'examen pédiatrique approfondi recherche des anomalies silencieuses non dépistées à la maternité, telles qu'une luxation de hanche (manœuvre d'Ortolani/Barlow) ou un souffle cardiaque congénital."
+        }
+    ];
+
+    // Génération dynamique du HTML
+    const container = document.getElementById('quiz-container');
+
+    qcmData.forEach((item, qIdx) => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'quiz-item';
+        itemDiv.id = `q-${qIdx}`;
+
+        const qText = document.createElement('div');
+        qText.className = 'question-text';
+        qText.innerText = item.q;
+        itemDiv.appendChild(qText);
+
+        const optionsOl = document.createElement('ul');
+        optionsOl.className = 'options-list';
+
+        item.options.forEach((optText, oIdx) => {
+            const optLi = document.createElement('li');
+            optLi.className = 'option';
+            optLi.innerHTML = `<strong>${String.fromCharCode(65 + oIdx)})</strong>&nbsp;&nbsp;${optText}`;
+            
+            // Événement au clic
+            optLi.addEventListener('click', () => checkAnswer(qIdx, oIdx, item.correct, item.rationale));
+            optionsOl.appendChild(optLi);
+        });
+
+        itemDiv.appendChild(optionsOl);
+
+        // Zone de feedback cachée au départ
+        const feedback = document.createElement('div');
+        feedback.className = 'feedback-box';
+        feedback.id = `fb-${qIdx}`;
+        itemDiv.appendChild(feedback);
+
+        container.appendChild(itemDiv);
+    });
+
+    // Fonction de vérification
+    function checkAnswer(questionIdx, selectedIdx, correctIdx, rationaleText) {
+        const questionCard = document.getElementById(`q-${questionIdx}`);
+        
+        // Si la question a déjà été répondue, on évite les clics multiples
+        if (questionCard.classList.contains('disabled')) return;
+        
+        questionCard.classList.add('disabled');
+        const optionsHTML = questionCard.querySelectorAll('.option');
+        const feedbackBox = document.getElementById(`fb-${questionIdx}`);
+
+        // Coloration de l'option choisie et de la bonne réponse
+        if (selectedIdx === correctIdx) {
+            optionsHTML[selectedIdx].classList.add('correct');
+            feedbackBox.className = 'feedback-box visible correct-feedback';
+            feedbackBox.innerHTML = `<strong>✨ Correct !</strong><br><br>${rationaleText}`;
+        } else {
+            optionsHTML[selectedIdx].classList.add('wrong');
+            optionsHTML[correctIdx].classList.add('correct'); // Montre la bonne réponse
+            feedbackBox.className = 'feedback-box visible wrong-feedback';
+            feedbackBox.innerHTML = `<strong>❌ Mauvaise réponse.</strong> La bonne réponse était l'option <strong>${String.fromCharCode(65 + correctIdx)}</strong>.<br><br><strong>Explication :</strong> ${rationaleText}`;
+        }
+    }
+</script>
+
+</body>
+</html>
